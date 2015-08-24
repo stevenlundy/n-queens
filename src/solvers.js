@@ -93,10 +93,53 @@ window.addQueen = function(board, col){
   }
 };
 
+window.NQUEENSCOUNT = 0;
 // return the number of nxn chessboards that exist, with n queens placed such that none of them can attack each other
 window.countNQueensSolutions = function(n) {
-  var solution = undefined; //fixme
-
+  // var board = new Board({'n' : n});
+  // var solutionCount = addQueenAndCount(board, 0, 0);
+  var solutionCount = addQueenAndCountBitwise(n);
   console.log('Number of solutions for ' + n + ' queens:', solutionCount);
   return solutionCount;
+};
+
+window.addQueenAndCount = function(board, col, count){
+  var rows = board.rows();
+  if(board.hasAnyRowConflicts() || board.hasAnyMajorDiagonalConflicts() || board.hasAnyMinorDiagonalConflicts()) {
+    NQUEENSCOUNT++;
+    return count;
+  }
+  if (col >= rows.length){
+    NQUEENSCOUNT++;
+    return count + 1;
+  }
+  for (var i = 0; i < rows.length; i++) {
+    rows[i][col] = 1;
+    if( !(board._isInBounds(i-1,col-1) && rows[i-1][col-1]) && !(board._isInBounds(i+1,col-1) && rows[i+1][col-1]) && !(rows[i][col-1]) ){
+      count = addQueenAndCount(board, col + 1, count);
+    }
+    rows[i][col] = 0;
+  }
+  return count;
+};
+
+window.addQueenAndCountBitwise = function(n){
+  var all = Math.pow(2,n) - 1;
+  var count = 0;
+
+  var tryAddingQueen = function(ld, col, rd){
+    var poss = ~(ld | rd | col) & all;
+
+    if(col === all){
+      count++;
+    }
+
+    while(poss > 0){
+      var bit = poss & (~poss + 1);
+      poss -= bit;
+      tryAddingQueen((ld | bit) << 1, (col | bit), (rd | bit) >> 1);
+    }
+  };
+  tryAddingQueen(0,0,0);
+  return count;
 };
