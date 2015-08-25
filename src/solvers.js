@@ -98,9 +98,33 @@ window.NQUEENSCOUNT = 0;
 window.countNQueensSolutions = function(n) {
   // var board = new Board({'n' : n});
   // var solutionCount = addQueenAndCount(board, 0, 0);
-  var solutionCount = addQueenAndCountBitwise(n);
+  
+  //var solutionCount = addQueenAndCountBitwise(n);
+
+  var solutionCount = addQueenAndCountWorkers(n);
+
   console.log('Number of solutions for ' + n + ' queens:', solutionCount);
   return solutionCount;
+};
+
+window.addQueenAndCountWorkers = function(n){
+  var workers = [];
+  var count = 0;
+  var done = [];
+
+  for (var i = 0; i < n; i++) {
+    workers.push(new Worker('src/worker.js'));
+    var board = new Board({'n' : n});
+    board.rows()[i][0] = 1;
+    workers[i].postMessage([board]);
+    workers[i].onMessage(function(e){
+      done.push(true);
+      count += e.data;
+    });
+  }
+  while(done.length < n){
+  }
+  return count;
 };
 
 window.addQueenAndCount = function(board, col, count){
