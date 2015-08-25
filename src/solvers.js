@@ -95,19 +95,24 @@ window.addQueen = function(board, col){
 
 // return the number of nxn chessboards that exist, with n queens placed such that none of them can attack each other
 window.countNQueensSolutions = function(n) {
-  // var board = new Board({'n' : n});
-  // var solutionCount = addQueenAndCount(board, 0, 0);
+  var board = new Board({'n' : n});
+  var solutionCount = addQueenAndCount(board, 0, 0);
   
-  //var solutionCount = addQueenAndCountBitwise(n);
-
-  var solutionCount = addQueenAndCountWorkers(n);
+  var solutionCount = addQueenAndCountBitwise(n);
 
   console.log('Number of solutions for ' + n + ' queens:', solutionCount);
   return solutionCount;
 };
 
+window.countNQueensSolutionsWorkers = function(n) {
+  var solutionPromise = addQueenAndCountWorkers(n);
+
+  return solutionPromise;
+};
+
 window.addQueenAndCountWorkers = function(n){
   var workers = [];
+  var promises = [];
   window.gcount = 0;
   var done = [];
   
@@ -115,34 +120,28 @@ window.addQueenAndCountWorkers = function(n){
     workers.push(new Worker('src/worker.js'));
     var board = new Board({'n' : n});
     board.rows()[i][0] = 1;
-    workers[i].postMessage([board.rows(), i]);
-    workers[i].onmessage = function(e){
-      gen.next();
-      gcount += e.data;
-    };
+    
+    promises.push(new Promise(function(resolve,reject){
+      workers[i].postMessage([board.rows(), i]);
+      workers[i].onmessage = function(e){
+        resolve(e.data);
+      };
+    }));
   }
-  gen = workCounter();
-  gen.next();
-  function* workCounter(){
-  var index = 0;
-  while(index < 8)
-    yield index++;
-  };
-  //window.printfunc = setInterval(function(){console.log("count : " + count + "\nworkers done: " + done.length);}, 1000);
-  // var startTime = Date.now();
-  // while(Date.now() - startTime < 1000){
-  //   //console.log("count : " + count + "\nworkers done: " + done.length);
-  // }
-  //clearInterval(printfunc);
   
-  return gcount;
+  return new Promise(function(resolve, reject){
+    Promise.all(promises).then(function(e){
+      var count = 0;
+      for(var i = 0; i < e.length; i++){
+        count += e[i];
+      }
+      console.log("promise count: " + count);
+      resolve(count);
+    });
+  })
 };
 
-function* workCounter(){
-  var index = 0;
-  while(index < 8)
-    yield index++;
-}
+
 window.addQueenAndCount = function(board, col, count){
   var rows = board.rows();
   if(board.hasAnyRowConflicts() || board.hasAnyMajorDiagonalConflicts() || board.hasAnyMinorDiagonalConflicts()) {

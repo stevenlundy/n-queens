@@ -68,19 +68,31 @@ describe('solvers', function() {
 
   describe('countNQueensSolutions()', function() {
 
-    // it('finds the number of valid solutions for n of 0-8', function() {
-    //   _.range(2, 9).map(function(n) {
-    //     var solutionCount = countNQueensSolutions(n);
-    //     var expectedSolutionCount = [1, 1, 0, 0, 2, 10, 4, 40, 92][n];
+    it('finds the number of valid solutions for n of 0-8', function() {
+      _.range(0, 9).map(function(n) {
+        var solutionCount = countNQueensSolutions(n);
+        var expectedSolutionCount = [1, 1, 0, 0, 2, 10, 4, 40, 92][n];
 
-    //     expect(solutionCount).to.be.equal(expectedSolutionCount);
-    //   });
-    // });
-    it('find the number of valid solutions for 4', function() {
-        var solutionCount = countNQueensSolutions(8);
-        expect(solutionCount).to.be.equal(92);
-    })
+        expect(solutionCount).to.be.equal(expectedSolutionCount);
+      });
+    });
 
+  });
+  describe('countNQueensSolutionsWorkers()', function() {
+    var count;
+    
+    beforeEach(function(done){
+      var promise = countNQueensSolutionsWorkers(8);
+      promise.then(function(value){
+        count = value;
+        done();
+      });      
+    });
+    
+    
+     it('find the number of valid solution async', function(){
+      expect(count).to.be.equal(92);
+     }); 
   });
 
 });
