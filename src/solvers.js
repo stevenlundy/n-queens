@@ -108,24 +108,41 @@ window.countNQueensSolutions = function(n) {
 
 window.addQueenAndCountWorkers = function(n){
   var workers = [];
-  var count = 0;
+  window.gcount = 0;
   var done = [];
-
+  
   for (var i = 0; i < n; i++) {
     workers.push(new Worker('src/worker.js'));
     var board = new Board({'n' : n});
     board.rows()[i][0] = 1;
-    workers[i].postMessage([board]);
-    workers[i].onMessage(function(e){
-      done.push(true);
-      count += e.data;
-    });
+    workers[i].postMessage([board.rows(), i]);
+    workers[i].onmessage = function(e){
+      gen.next();
+      gcount += e.data;
+    };
   }
-  while(done.length < n){
-  }
-  return count;
+  gen = workCounter();
+  gen.next();
+  function* workCounter(){
+  var index = 0;
+  while(index < 8)
+    yield index++;
+  };
+  //window.printfunc = setInterval(function(){console.log("count : " + count + "\nworkers done: " + done.length);}, 1000);
+  // var startTime = Date.now();
+  // while(Date.now() - startTime < 1000){
+  //   //console.log("count : " + count + "\nworkers done: " + done.length);
+  // }
+  //clearInterval(printfunc);
+  
+  return gcount;
 };
 
+function* workCounter(){
+  var index = 0;
+  while(index < 8)
+    yield index++;
+}
 window.addQueenAndCount = function(board, col, count){
   var rows = board.rows();
   if(board.hasAnyRowConflicts() || board.hasAnyMajorDiagonalConflicts() || board.hasAnyMinorDiagonalConflicts()) {

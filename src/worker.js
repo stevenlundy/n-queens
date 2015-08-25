@@ -6,12 +6,12 @@
 // The only portions you need to work on are the helper functions (below)
 
   var Board = function(board){
-    this.rows = board;
+    this.board = board;
   };
 
   Board.prototype  =  {
     rows: function() {
-      return this.rows;
+      return this.board;
     },
 
     togglePiece: function(rowIndex, colIndex) {
@@ -82,7 +82,7 @@
 
     // test if any rows on this board contain conflicts
     hasAnyRowConflicts: function() {
-      var n = this.rows.length;
+      var n = this.board.length;
       for (var i = 0; i < n; i++) {
         if(this.hasRowConflictAt(i)){
           return true;
@@ -111,7 +111,7 @@
 
     // test if any columns on this board contain conflicts
     hasAnyColConflicts: function() {
-      var n = this.rows.length;
+      var n = this.board.length;
       for (var i = 0; i < n; i++) {
         if(this.hasColConflictAt(i)){
           return true;
@@ -141,7 +141,7 @@
 
     // test if any major diagonals on this board contain conflicts
     hasAnyMajorDiagonalConflicts: function() {
-      var n = this.rows.length;
+      var n = this.board.length;
       for (var i = -n + 1; i < n; i++) {
         if(this.hasMajorDiagonalConflictAt(i)){
           return true;
@@ -171,7 +171,7 @@
 
     // test if any minor diagonals on this board contain conflicts
     hasAnyMinorDiagonalConflicts: function() {
-      var n = this.rows.length;
+      var n = this.board.length;
       for (var i = 0; i < (n-1)*2; i++) {
         if(this.hasMinorDiagonalConflictAt(i)){
           return true;
@@ -189,6 +189,7 @@
 
 var addQueenAndCount = function(board, col, count){
   var rows = board.rows();
+
   if(board.hasAnyRowConflicts() || board.hasAnyMajorDiagonalConflicts() || board.hasAnyMinorDiagonalConflicts()) {
     return count;
   }
@@ -206,10 +207,10 @@ var addQueenAndCount = function(board, col, count){
 };
 
 var onmessage = function(e) {
-  var board = e.data[0];
-
+  var board = new Board(e.data[0]);
   var count = addQueenAndCount(board, 1, 0);
-
+  console.log("board size: " + board.board.length);
+  console.log("worker"+e.data[1]+" count: " + count);
   console.log('Posting message back to main script');
   postMessage(count);
 };
