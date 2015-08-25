@@ -70,7 +70,13 @@ describe('solvers', function() {
 
     it('finds the number of valid solutions for n of 0-8', function() {
       _.range(0, 9).map(function(n) {
+        if(n === 8){
+          var startTime = Date.now();
+        }
         var solutionCount = countNQueensSolutions(n);
+        if(n === 8){
+          console.log(Date.now() - startTime);
+        }
         var expectedSolutionCount = [1, 1, 0, 0, 2, 10, 4, 40, 92][n];
 
         expect(solutionCount).to.be.equal(expectedSolutionCount);
@@ -80,11 +86,12 @@ describe('solvers', function() {
   });
   describe('countNQueensSolutionsWorkers()', function() {
     var count;
-    
+    var startTime = Date.now();
     beforeEach(function(done){
       var promise = countNQueensSolutionsWorkers(8);
       promise.then(function(value){
         count = value;
+        console.log(Date.now() - startTime);
         done();
       });      
     });
@@ -94,5 +101,21 @@ describe('solvers', function() {
       expect(count).to.be.equal(92);
      }); 
   });
-
+  describe('countNQueensSolutionsBitwiseWorkers()', function() {
+    var count;
+    var startTime = Date.now();
+    beforeEach(function(done){
+      var promise = countNQueensSolutionsBitwiseWorkers(8);
+      promise.then(function(value){
+        count = value;
+        console.log(Date.now() - startTime);
+        done();
+      });      
+    });
+    
+    
+     it('find the number of valid solution async', function(){
+      expect(count).to.be.equal(92);
+     }); 
+  });
 });

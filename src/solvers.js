@@ -95,8 +95,8 @@ window.addQueen = function(board, col){
 
 // return the number of nxn chessboards that exist, with n queens placed such that none of them can attack each other
 window.countNQueensSolutions = function(n) {
-  var board = new Board({'n' : n});
-  var solutionCount = addQueenAndCount(board, 0, 0);
+  //var board = new Board({'n' : n});
+  //var solutionCount = addQueenAndCount(board, 0, 0);
   
   var solutionCount = addQueenAndCountBitwise(n);
 
@@ -110,10 +110,15 @@ window.countNQueensSolutionsWorkers = function(n) {
   return solutionPromise;
 };
 
+window.countNQueensSolutionsBitwiseWorkers = function(n) {
+  var solutionPromise = addQueenAndCountBitwiseWorkers(n);
+
+  return solutionPromise;
+};
+
 window.addQueenAndCountWorkers = function(n){
   var workers = [];
   var promises = [];
-  window.gcount = 0;
   var done = [];
   
   for (var i = 0; i < n; i++) {
@@ -179,4 +184,34 @@ window.addQueenAndCountBitwise = function(n){
   };
   tryAddingQueen(0,0,0);
   return count;
+};
+
+window.addQueenAndCountBitwiseWorkers = function (n){
+  var all = Math.pow(2,n) - 1;
+  var count = 0;
+  var workers = [];
+  var promises = [];
+  
+  var col = 1;
+  for (var i = 0; i < n; i++){
+    workers.push(new Worker('src/bitWorker.js'));
+    promises.push(new Promise(function(resolve,reject){
+      workers[i].postMessage([col, all]);
+      workers[i].onmessage = function(e){
+        resolve(e.data);
+      };
+    }));
+    col *= 2;
+  }
+  
+  return new Promise(function(resolve, reject){
+    Promise.all(promises).then(function(e){
+      var count = 0;
+      for(var i = 0; i < e.length; i++){
+        count += e[i];
+      }
+      console.log("promise count: " + count);
+      resolve(count);
+    });
+  });  
 };
